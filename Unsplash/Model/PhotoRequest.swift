@@ -1,5 +1,5 @@
 //
-//  SearchRequest.swift
+//  PhotoRequest.swift
 //  Unsplash
 //
 //  Created by Harry Kim on 2020/06/26.
@@ -8,7 +8,8 @@
 
 import Foundation
 
-struct SearchRequest: Codable {
+// MARK: - PhotoRequest
+struct PhotoRequest: Codable {
     var page: Int
-    var query: String
+    var query: String?
 }

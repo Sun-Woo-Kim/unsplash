@@ -10,14 +10,14 @@ import Alamofire
 
 class NetworkManager {
 
-    static let header = HTTPHeaders(["Authorization": "Client-ID UPyKMQByq7T-BM2XYLwP6zyzQ4q9oveKSHe0qfxE2Es"])
+    private static let header = HTTPHeaders(["Authorization": "Client-ID UPyKMQByq7T-BM2XYLwP6zyzQ4q9oveKSHe0qfxE2Es"])
 
-    static func getPhotoSearchInfo(request: SearchRequest) -> Router<SearchResponse> {
+    static func getPhotoSearchInfo(request: PhotoRequest) -> Router<PhotoResponse> {
         return Router(url: "search/photos/", parameters: request, header: header)
     }
 
-    static func getPhotoListInfo() -> Router<[PhotoInfo]> {
-        return Router(url: "photos/", header: header)
+    static func getPhotoListInfo(request: PhotoRequest) -> Router<[PhotoInfo]> {
+        return Router(url: "photos/", parameters: request, header: header)
     }
 
     static func cancelAllRequest() {

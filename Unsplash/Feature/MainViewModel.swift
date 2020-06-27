@@ -1,5 +1,5 @@
 //
-//  SearchViewModel.swift
+//  MainViewModel.swift
 //  Unsplash
 //
 //  Created by Harry Kim on 2020/06/25.
@@ -9,28 +9,32 @@
 import RxSwift
 import RxCocoa
 
-protocol SearchViewModelType {
-    var inputs: SearchViewModelInput { get }
-    var outputs: SearchViewModelOutput { get }
+protocol MainViewModelType {
+    var inputs: MainViewModelInput { get }
+    var outputs: MainViewModelOutput { get }
 }
 
-protocol SearchViewModelInput {
+protocol MainViewModelInput {
     func search(by text: String)
     func fetchNext()
     func refresh()
+    func select(indexPath: IndexPath?)
 }
 
-protocol SearchViewModelOutput {
+protocol MainViewModelOutput {
     var error: PublishRelay<Error> { get }
     var items: BehaviorRelay<[PhotoInfo]> { get }
+    var selectedIndexPath: BehaviorRelay<IndexPath?> { get }
 }
 
-class SearchViewModel: SearchViewModelType, SearchViewModelInput, SearchViewModelOutput {
-
+class MainViewModel: MainViewModelType, MainViewModelInput, MainViewModelOutput {
+    
+    var selectedIndexPath: BehaviorRelay<IndexPath?> = .init(value: nil)
+     
     private let disposeBag = DisposeBag()
 
-    var inputs: SearchViewModelInput { return self }
-    var outputs: SearchViewModelOutput { return self }
+    var inputs: MainViewModelInput { return self }
+    var outputs: MainViewModelOutput { return self }
 
     let items: BehaviorRelay<[PhotoInfo]> = .init(value: [])
     let error: PublishRelay<Error> = .init()
@@ -61,7 +65,7 @@ class SearchViewModel: SearchViewModelType, SearchViewModelInput, SearchViewMode
                 NetworkManager.cancelAllRequest()
                 self.didSetEndPage = false
                 self.isRequesting = false
-                self.page = -1
+                self.page = 0
                 self.items.accept([])
 
                 if text.isEmpty {
@@ -73,15 +77,19 @@ class SearchViewModel: SearchViewModelType, SearchViewModelInput, SearchViewMode
             .disposed(by: disposeBag)
     }
 }
-extension SearchViewModel {
+extension MainViewModel {
 
     func search(by text: String) {
         searchTextProperty.accept(text)
     }
 
     func fetchNext() {
-        guard !isRequesting, !didSetEndPage else { return }
-        getSearchInfo(by: searchTextProperty.value)
+        guard !isRequesting, !didSetEndPage, items.value.count > 0 else { return }
+        if searchTextProperty.value.isEmpty {
+           getPhotoList()
+        } else {
+            getSearchInfo(by: searchTextProperty.value)
+        }
     }
 
     func refresh() {
@@ -116,7 +124,7 @@ extension SearchViewModel {
 
     func getPhotoList() {
         isRequesting = true
-        NetworkManager.getPhotoListInfo()
+        NetworkManager.getPhotoListInfo(request: .init(page: page, query: nil))
             .asObservable()
             .subscribe(
                 onNext: { [weak self] photoInfos in
@@ -139,4 +147,7 @@ extension SearchViewModel {
             }).disposed(by: disposeBag)
     }
 
+    func select(indexPath: IndexPath?) {
+        self.selectedIndexPath.accept(indexPath)
+    }
 }

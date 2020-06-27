@@ -11,7 +11,6 @@ import RxSwift
 import Alamofire
 
 struct Router<T: Codable> {
-    private let clientID = "UPyKMQByq7T-BM2XYLwP6zyzQ4q9oveKSHe0qfxE2Es"
     private let baseURL = "https://api.unsplash.com/"
 
     private let url: String
@@ -55,10 +54,11 @@ extension Router {
                         Logger.info(prettyString)
                         let formatter = DateFormatter()
                         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+                        
                         let decoder = JSONDecoder()
                         decoder.keyDecodingStrategy = .convertFromSnakeCase
-
                         decoder.dateDecodingStrategy = .formatted(formatter)
+                        
                         let value = try decoder.decode(T.self, from: data)
                         observer.onNext(value)
                         observer.onCompleted()

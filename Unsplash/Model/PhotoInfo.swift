@@ -21,31 +21,11 @@ import Foundation
      let likedByUser: Bool
      let currentUserCollections: [String]
      let user: User
-
-//     enum CodingKeys: String, CodingKey {
-//         case id
-//         case createdAt = "created_at"
-//         case updatedAt = "updated_at"
-//         case promotedAt = "promoted_at"
-//         case width, height, color
-//         case resultDescription = "description"
-//         case altDescription = "alt_description"
-//         case urls, links, categories, likes
-//         case likedByUser = "liked_by_user"
-//         case currentUserCollections = "current_user_collections"
-//         case user
-//     }
  }
 
  // MARK: - ResultLinks
  struct ResultLinks: Codable {
-     let linksSelf, html, download, downloadLocation: String
-
-     enum CodingKeys: String, CodingKey {
-         case linksSelf = "self"
-         case html, download
-         case downloadLocation
-     }
+     let html, download, downloadLocation: String
  }
 
  // MARK: - Urls
@@ -67,34 +47,12 @@ import Foundation
      let instagramUsername: String?
      let totalCollections, totalLikes, totalPhotos: Int?
      let acceptedTos: Bool?
-
-//     enum CodingKeys: String, CodingKey {
-//         case id
-//         case updatedAt = "updated_at"
-//         case username, name
-//         case firstName = "first_name"
-//         case lastName = "last_name"
-//         case twitterUsername = "twitter_username"
-//         case portfolioURL = "portfolio_url"
-//         case bio, location, links
-//         case profileImage = "profile_image"
-//         case instagramUsername = "instagram_username"
-//         case totalCollections = "total_collections"
-//         case totalLikes = "total_likes"
-//         case totalPhotos = "total_photos"
-//         case acceptedTos = "accepted_tos"
-//     }
  }
 
  // MARK: - UserLinks
  struct UserLinks: Codable {
      let linksSelf, html, photos, likes: String?
      let portfolio, following, followers: String
-
-//     enum CodingKeys: String, CodingKey {
-//         case linksSelf = "self"
-//         case html, photos, likes, portfolio, following, followers
-//     }
  }
 
  // MARK: - ProfileImage

@@ -1,5 +1,5 @@
 //
-//  SearchResponse.swift
+//  PhotoResponse.swift
 //  Unsplash
 //
 //  Created by Harry Kim on 2020/06/25.
@@ -8,14 +8,8 @@
 
  import Foundation
 
- // MARK: - SearchResponse
- struct SearchResponse: Codable {
+ // MARK: - PhotoResponse
+ struct PhotoResponse: Codable {
      let total, totalPages: Int
      let results: [PhotoInfo]
-
-//     enum CodingKeys: String, CodingKey {
-//         case total
-//         case totalPages = "total_pages"
-//         case results
-//     }
  }

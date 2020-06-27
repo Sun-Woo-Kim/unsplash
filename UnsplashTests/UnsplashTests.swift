@@ -12,17 +12,17 @@ import RxSwift
 
 class UnsplashTests: XCTestCase {
 
-    var searchViewModel: SearchViewModel?
+    var viewModel: MainViewModel?
     var disposeBag = DisposeBag()
 
     override func setUp() {
         super.setUp()
-        searchViewModel = SearchViewModel()
+        viewModel = MainViewModel()
 
     }
 
     override func tearDown() {
-        searchViewModel = nil
+        viewModel = nil
         disposeBag = DisposeBag()
         super.tearDown()
     }
@@ -59,7 +59,7 @@ class UnsplashTests: XCTestCase {
 
         let expt = expectation(description: "Waiting done List API...")
 
-        NetworkManager.getPhotoListInfo()
+        NetworkManager.getPhotoListInfo(request: .init(page: 1, query: nil))
             .asObservable()
             .subscribe(
                 onNext: { results in

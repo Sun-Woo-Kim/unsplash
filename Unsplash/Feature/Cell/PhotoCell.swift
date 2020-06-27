@@ -8,10 +8,7 @@
 
 import UIKit
 
-class PhotoCell: UITableViewCell {
-    @IBOutlet weak var imageHeight: NSLayoutConstraint!
-
+class PhotoCell: UITableViewCell { 
     @IBOutlet weak var photoImageView: UIImageView!
     @IBOutlet weak var userLabel: UILabel!
-
 }

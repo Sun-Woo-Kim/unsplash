@@ -1,5 +1,5 @@
 //
-//  SearchViewController.swift
+//  MainViewController.swift
 //  Unsplash
 //
 //  Created by Harry Kim on 2020/06/25.
@@ -10,23 +10,19 @@ import UIKit
 import RxSwift
 import RxCocoa
 import Kingfisher
-import Hero
 
-class SearchViewController: UIViewController, UISearchBarDelegate {
-
-    let disposeBag = DisposeBag()
-
-    private let viewModel: SearchViewModelType = SearchViewModel()
-
-    @IBOutlet private weak var tableView: UITableView!
-
+class MainViewController: UIViewController, UISearchBarDelegate {
+    
+    private let searchPhotoText = "Search Photos"
+    private let disposeBag = DisposeBag()
+    private let viewModel: MainViewModelType = MainViewModel()
     private var searchController: UISearchController = UISearchController(searchResultsController: nil)
-
-    private var isShowingDetail = false
-
+    
+    @IBOutlet private weak var tableView: UITableView!
+ 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+ 
         searchController.searchBar.becomeFirstResponder()
         searchController.searchBar.autocapitalizationType = .none
         searchController.searchBar.rx.setDelegate(self).disposed(by: disposeBag)
@@ -34,28 +30,22 @@ class SearchViewController: UIViewController, UISearchBarDelegate {
 
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = true
+        navigationItem.title = searchPhotoText
 
         bindSearchBar()
         bindTableView()
 
     }
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        tableView.reloadData()
-        isShowingDetail = false
-    }
 }
 
-extension SearchViewController: UITableViewDelegate {
+extension MainViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         guard let model: PhotoInfo = try? tableView.rx.model(at: indexPath) else { return UITableView.automaticDimension }
-        let height = view.bounds.width * CGFloat(model.height) / CGFloat(model.width)
-        return height
+        return view.bounds.width * CGFloat(model.height) / CGFloat(model.width)
     }
 }
 
-extension SearchViewController {
-
+extension MainViewController {
     func bindTableView() {
         tableView.separatorStyle = .none
         tableView.rx.setDelegate(self).disposed(by: disposeBag)
@@ -67,15 +57,12 @@ extension SearchViewController {
                 guard let self = self else { return }
 
                 cell.selectionStyle = .none
-                //cell.hero.isEnabledForSubviews = false
 
                 cell.photoImageView.kf.indicatorType = .activity
                 cell.photoImageView.contentMode = .scaleToFill
                 cell.photoImageView.kf.setImage(with: URL(string: model.urls.regular))
-                //cell.photoImageView.hero.id = HeroStyle.image.apply
 
                 cell.userLabel.text = model.user.name ?? ""
-                //cell.userLabel.hero.id = HeroStyle.title.apply
 
                 let itemCount = self.viewModel.outputs.items.value.count
                 if itemCount - index < 7 {
@@ -85,39 +72,41 @@ extension SearchViewController {
         }.disposed(by: disposeBag)
 
         tableView.rx.itemSelected
-            .observeOn(MainScheduler.instance)
             .bind {  [weak self] indexPath in
-                guard let self = self else {return }
-                let cell = self.tableView.cellForRow(at: indexPath)
-                cell?.hero.isEnabledForSubviews = true
-
-                self.isShowingDetail = true
-
-//                self.navigationController.hero.isEnabled = true
-//                self.navigationController.pushViewController(viewController, animated: true)
+                guard let self = self else { return }
+                self.viewModel.inputs.select(indexPath: indexPath)
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                guard let viewController = storyboard.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController else { return }
+                viewController.viewModel = self.viewModel
+                self.present(viewController, animated: true)
         }.disposed(by: disposeBag)
-
+        
+        viewModel.outputs.selectedIndexPath
+            .compactMap { $0 }
+            .bind { [weak self] indexPath in
+                self?.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+        }.disposed(by: disposeBag)
     }
 
     func bindSearchBar() {
         searchController.searchBar.rx.text
             .orEmpty
             .changed
-            .filter { _ in !self.isShowingDetail }.bind { text in
-                self.navigationItem.title = text
-                self.viewModel.inputs.search(by: text)
-
-        }
+            .bind { [weak self] text in self?.setSearchText(with: text) }
             .disposed(by: disposeBag)
 
         searchController.rx.willDismiss
             .compactMap { self.searchController.searchBar.text }
             .observeOn(MainScheduler.asyncInstance)
-            .bind { text in
-                self.navigationItem.title = text
-                self.searchController.searchBar.text = text
-                self.viewModel.inputs.search(by: text)
+            .bind { [weak self] text in
+                self?.searchController.searchBar.text = text
+                self?.setSearchText(with: text)
         }.disposed(by: disposeBag)
+    }
+    
+    func setSearchText(with text: String) {
+        self.navigationItem.title = text.isEmpty ? self.searchPhotoText : text
+        self.viewModel.inputs.search(by: text)
     }
 }
 

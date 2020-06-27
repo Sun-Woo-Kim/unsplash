@@ -63,7 +63,12 @@ class SearchViewModel: SearchViewModelType, SearchViewModelInput, SearchViewMode
                 self.isRequesting = false
                 self.page = -1
                 self.items.accept([])
-                self.getSearchInfo(by: text)
+
+                if text.isEmpty {
+                    self.getPhotoList()
+                } else {
+                    self.getSearchInfo(by: text)
+                }
             }
             .disposed(by: disposeBag)
     }
@@ -83,7 +88,7 @@ extension SearchViewModel {
         items.accept(items.value)
     }
 
-    func getSearchInfo(by text: String) { 
+    func getSearchInfo(by text: String) {
         isRequesting = true
         NetworkManager.getPhotoSearchInfo(request: .init(page: page, query: text))
             .asObservable()
@@ -92,7 +97,32 @@ extension SearchViewModel {
                 onNext: { [weak self] photoInfos in
                     guard let self = self else { return }
 
-                    guard newResults.count > 0 else {
+                    guard photoInfos.count > 0 else {
+                        self.didSetEndPage = true
+                        return
+                    }
+
+                    let oldInfos = self.items.value
+                    self.items.accept(oldInfos + photoInfos) },
+
+                onError: { [weak self] error in
+                    self?.error.accept(error) },
+
+                onDisposed: { [weak self] in
+                    self?.isRequesting = false
+
+            }).disposed(by: disposeBag)
+    }
+
+    func getPhotoList() {
+        isRequesting = true
+        NetworkManager.getPhotoListInfo()
+            .asObservable()
+            .subscribe(
+                onNext: { [weak self] photoInfos in
+                    guard let self = self else { return }
+
+                    guard photoInfos.count > 0 else {
                         self.didSetEndPage = true
                         return
                     }

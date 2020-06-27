@@ -2,7 +2,7 @@
 
 ### 개요
 
-- Unsplash Map API를 활용한 지도 정보 앱
+- Unsplash API를 활용한 이미지 정보 앱
 - Min iOS ver: 12.0
 - Dark mode 지원
 
